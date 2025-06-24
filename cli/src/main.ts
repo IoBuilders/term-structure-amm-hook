@@ -14,7 +14,7 @@ import {
 import { type Address } from "viem";
 import { ERC20 } from "@blockchain/ERC20";
 import Time from "@time";
-import { deployHookAndTokens } from "@utils";
+import { connectAccountToHookAndTokens } from "@utils";
 
 let atsControlList: AtsControlList;
 let bond: ERC20;
@@ -126,7 +126,7 @@ console.log(
   hookInquirer_: hookInquirer,
   bond_: bond,
   eur_: eur,
-} = await deployHookAndTokens({
+} = await connectAccountToHookAndTokens({
   account,
   config,
   circleInquirer,
@@ -387,7 +387,7 @@ do {
         hookInquirer_: hookInquirer,
         bond_: bond,
         eur_: eur,
-      } = await deployHookAndTokens({
+      } = await connectAccountToHookAndTokens({
         account,
         config,
         circleInquirer,

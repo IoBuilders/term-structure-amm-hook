@@ -6,7 +6,7 @@ import type { AtsControlList } from "@blockchain/AtsControlList";
 import { maxUint256 } from "viem";
 
 // * Utility function to connect the account to the tokens and the hook
-export async function deployHookAndTokens({
+export async function connectAccountToHookAndTokens({
   account,
   config,
   circleInquirer,

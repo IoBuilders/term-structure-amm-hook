@@ -5,7 +5,7 @@
       "name": "term-structure-amm-cli",
       "dependencies": {
         "@inquirer/prompts": "^7.5.3",
-        "viem": "^2.31.3",
+        "viem": "^2.31.4",
       },
       "devDependencies": {
         "@types/bun": "latest",

@@ -43,7 +43,8 @@
       "@blockchain/HookHub": ["blockchain/HookHub/index.ts"],
       "@circle": ["circle/index.ts"],
       "@hook": ["hook/index.ts"],
-      "@inquirer": ["inquirer/index.ts"]
+      "@inquirer": ["inquirer/index.ts"],
+      "@utils": ["utils.ts"]
     }
   }
 }

@@ -1,0 +1,20 @@
+{
+  "name": "term-structure-amm-cli",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "bun run src/main.ts",
+    "prettier": "bun x prettier --write ."
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.5.3",
+    "viem": "^2.31.4"
+  }
+}

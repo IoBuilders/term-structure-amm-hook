@@ -1,0 +1,2 @@
+@uniswap/v4-periphery=lib/v4-periphery
+@hashgraph/ats=lib/asset-tokenization-studio

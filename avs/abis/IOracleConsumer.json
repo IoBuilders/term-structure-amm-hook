@@ -1,0 +1,106 @@
+[
+  {
+    "type": "function",
+    "name": "getBondHookConfigData",
+    "inputs": [
+      {
+        "name": "_poolId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "poolConfigData_",
+        "type": "tuple",
+        "internalType": "struct IOracleConsumer.PoolConfigData",
+        "components": [
+          {
+            "name": "vault0",
+            "type": "address",
+            "internalType": "contract ERC4626"
+          },
+          {
+            "name": "vault1",
+            "type": "address",
+            "internalType": "contract ERC4626"
+          },
+          {
+            "name": "baseSensitivity",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "limitSensitivity",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "sensitivityDecayRate",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "deltaPriceThreshold",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "marketDynamicGamma",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "ytm",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "defaultFee",
+            "type": "uint24",
+            "internalType": "uint24"
+          },
+          {
+            "name": "baseFee",
+            "type": "uint24",
+            "internalType": "uint24"
+          },
+          {
+            "name": "feeDecayRate",
+            "type": "uint24",
+            "internalType": "uint24"
+          },
+          {
+            "name": "singleSidedIncentive",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "ytmOracle",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "updateBondYtm",
+    "inputs": [
+      {
+        "name": "_poolId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "_ytm",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  }
+]

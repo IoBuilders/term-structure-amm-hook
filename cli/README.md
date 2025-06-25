@@ -74,7 +74,7 @@ There are three account types:
 
 #### Checking Compliance Status
 
-- Query any user’s status via Circle’s API:
+- Query any user’s status via Circle’s API.
 
 #### Control List
 

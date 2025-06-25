@@ -65,6 +65,7 @@ In one terminal:
 In a new terminal, generate demo tasks every 10 seconds:
 
 ```sh
+cd contracts
 make start-traffic
 ```
 

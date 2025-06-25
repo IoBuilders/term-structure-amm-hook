@@ -88,15 +88,6 @@ contract PoolLauncher is Script {
 
         hookHub.modifyLiquidity(params);
 
-        // // Test swap
-        // {
-        //     SwapParams memory swapParams = SwapParams({
-        //         zeroForOne: true,
-        //         amountSpecified: -int256(DECIMAL_PRECISION),
-        //         sqrtPriceLimitX96: TickMath.MIN_SQRT_PRICE + 1
-        //     });
-        //     MockRouter(mockRouter).executeSwap(swapParams);
-        // }
         address lpToken = hookHub.bondDetails(bond);
 
         vm.stopBroadcast();

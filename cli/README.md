@@ -56,6 +56,8 @@ There are three account types:
 
 #### Providing Liquidity
 
+https://github.com/user-attachments/assets/a396e972-75fc-4211-b261-05e87a5e4f24
+
 1. Choose a token and amount.
 2. The hook calculates the counterpart deposit.
 3. You can also act as a single-sided LP: the pool will withdraw the non-desired input token from the vaults.
@@ -67,10 +69,14 @@ There are three account types:
 
 #### Swapping
 
+https://github.com/user-attachments/assets/240ba743-bd12-4074-9ad9-64937f5ea26a
+
 - **Positive amount** = “I want to receive exactly this much output token.”
 - **Negative amount** = “I want to deposit exactly this much input token.”
 
 ### Compliance
+
+https://github.com/user-attachments/assets/d0267298-4772-4271-bd49-bff31d14cedf
 
 #### Checking Compliance Status
 

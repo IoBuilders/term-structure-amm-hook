@@ -87,7 +87,7 @@ contract BondHookDeployer is IUnlockCallback, IMsgSender, Test {
         anvilFork = vm.createFork(vm.envString("LOCAL_RPC_URL"));
         vm.selectFork(anvilFork);
         // Set up actors
-        deployer = vm.rememberKey(vm.envUint("PRIVATE_KEY"));
+        deployer = vm.rememberKey(vm.envUint("PRIVATE_KEY_ADMIN"));
         vm.label(deployer, "Deployer");
         investor = makeAddr("investor");
         vm.label(investor, "Investor");
@@ -318,7 +318,7 @@ contract BondHookDeployer is IUnlockCallback, IMsgSender, Test {
         assertApproxEqRel(eur.balanceOf(swapper), eurToReceive, DECIMAL_PRECISION / 1000);
         (uint256 feeGrowthGlobal0X128, uint256 feeGrowthGlobal1X128, uint160 sqrtPriceX96,, uint256 liquidityAfter) =
             bondHookHub.getPoolInternalState(poolKey.toId());
-        assertEq(liquidityAfter, liquidityBefore);
+        assertApproxEqRel(liquidityAfter, liquidityBefore, DECIMAL_PRECISION / 1000);
         assertApproxEqRel(
             feeGrowthGlobal0X128 * liquidityBefore / FixedPoint128.Q128,
             bondsToSwap * configData.defaultFee / PIPS_DENOMINATOR,
@@ -354,7 +354,7 @@ contract BondHookDeployer is IUnlockCallback, IMsgSender, Test {
         assertApproxEqRel(ERC20(bond).balanceOf(swapper), bondsToReceive, DECIMAL_PRECISION / 1000);
         (uint256 feeGrowthGlobal0X128, uint256 feeGrowthGlobal1X128, uint160 sqrtPriceX96,, uint256 liquidityAfter) =
             bondHookHub.getPoolInternalState(poolKey.toId());
-        assertEq(liquidityAfter, liquidityBefore);
+        assertApproxEqRel(liquidityAfter, liquidityBefore, DECIMAL_PRECISION / 1000);
         assertApproxEqRel(
             feeGrowthGlobal1X128 * liquidityBefore / FixedPoint128.Q128,
             eursToSwap * configData.defaultFee / PIPS_DENOMINATOR,
@@ -392,7 +392,7 @@ contract BondHookDeployer is IUnlockCallback, IMsgSender, Test {
         assertEq(eur.balanceOf(swapper), eurToReceive);
         (uint256 feeGrowthGlobal0X128, uint256 feeGrowthGlobal1X128, uint160 sqrtPriceX96,, uint256 liquidityAfter) =
             bondHookHub.getPoolInternalState(poolKey.toId());
-        assertEq(liquidityAfter, liquidityBefore);
+        assertApproxEqRel(liquidityAfter, liquidityBefore, DECIMAL_PRECISION / 1000);
         assertApproxEqRel(
             feeGrowthGlobal0X128 * liquidityBefore / FixedPoint128.Q128,
             bondsToSwap * configData.defaultFee / PIPS_DENOMINATOR,
@@ -428,7 +428,7 @@ contract BondHookDeployer is IUnlockCallback, IMsgSender, Test {
         assertEq(ERC20(bond).balanceOf(swapper), bondsToReceive);
         (uint256 feeGrowthGlobal0X128, uint256 feeGrowthGlobal1X128, uint160 sqrtPriceX96,, uint256 liquidityAfter) =
             bondHookHub.getPoolInternalState(poolKey.toId());
-        assertEq(liquidityAfter, liquidityBefore);
+        assertApproxEqRel(liquidityAfter, liquidityBefore, DECIMAL_PRECISION / 1000);
         assertApproxEqRel(
             feeGrowthGlobal1X128 * liquidityBefore / FixedPoint128.Q128,
             eursToSwap * configData.defaultFee / PIPS_DENOMINATOR,
@@ -559,7 +559,9 @@ contract BondHookDeployer is IUnlockCallback, IMsgSender, Test {
         uint256 poolBalance1 = manager.balanceOf(address(bondHookHub), poolKey.currency1.toId());
         vm.roll(block.number + 1);
         _swapBondToEur(2);
-        (,, uint160 sqrtPriceAfterX96,,) = bondHookHub.getPoolInternalState(poolKey.toId());
+        uint256 poolBalance0After = manager.balanceOf(address(bondHookHub), poolKey.currency0.toId());
+        uint256 poolBalance1After = manager.balanceOf(address(bondHookHub), poolKey.currency1.toId());
+        (,, uint160 sqrtPriceAfterX96,, uint128 liqudity) = bondHookHub.getPoolInternalState(poolKey.toId());
         (uint256 reserveAmount0,) = bondHookHub.getReserveAmounts(poolKey.toId());
         uint256 surplusBonds = poolBalance0
             - poolBalance1 * DECIMAL_PRECISION
@@ -567,6 +569,7 @@ contract BondHookDeployer is IUnlockCallback, IMsgSender, Test {
         assertGt(surplusBonds, DUST_THRESHOLD);
         assertApproxEqRel(surplusBonds, reserveAmount0, DECIMAL_PRECISION / 1000);
         assertEq(reserveAmount0, configData.vault0.totalAssets());
+        assertApproxEqRel((poolBalance0After * poolBalance1After).sqrt(), liqudity, DECIMAL_PRECISION / 1000);
     }
 
     function test_surplus_eur_is_deposited_in_vault() external {
@@ -576,13 +579,16 @@ contract BondHookDeployer is IUnlockCallback, IMsgSender, Test {
         uint256 poolBalance1 = manager.balanceOf(address(bondHookHub), poolKey.currency1.toId());
         vm.roll(block.number + 1);
         _swapEurToBond(2);
-        (,, uint160 sqrtPriceAfterX96,,) = bondHookHub.getPoolInternalState(poolKey.toId());
+        uint256 poolBalance0After = manager.balanceOf(address(bondHookHub), poolKey.currency0.toId());
+        uint256 poolBalance1After = manager.balanceOf(address(bondHookHub), poolKey.currency1.toId());
+        (,, uint160 sqrtPriceAfterX96,, uint128 liqudity) = bondHookHub.getPoolInternalState(poolKey.toId());
         (, uint256 reserveAmount1) = bondHookHub.getReserveAmounts(poolKey.toId());
         uint256 surplusEurs = poolBalance1
             - poolBalance0.mulDiv(sqrtPriceAfterX96, FixedPoint96.Q96).mulDiv(sqrtPriceAfterX96, FixedPoint96.Q96);
         assertGt(surplusEurs, DUST_THRESHOLD);
         assertApproxEqRel(surplusEurs, reserveAmount1, DECIMAL_PRECISION / 1000);
         assertEq(reserveAmount1, configData.vault1.totalAssets());
+        assertApproxEqRel((poolBalance0After * poolBalance1After).sqrt(), liqudity, DECIMAL_PRECISION / 1000);
     }
 
     // Single sided LP
@@ -726,7 +732,8 @@ contract BondHookDeployer is IUnlockCallback, IMsgSender, Test {
         uint256 vault0Balance = ERC20(bond).balanceOf(address(configData.vault0));
         uint256 vault1Balance = eur.balanceOf(address(configData.vault1));
         deal(address(eur), address(configData.vault1), vault1Balance + rewardsToDistribute);
-        deal(address(bond), address(configData.vault0), vault0Balance + rewardsToDistribute);
+        vm.prank(deployer);
+        ERC1594(bond).issue(address(configData.vault0), rewardsToDistribute, "");
         bondHookHub.distributeYieldFarmingRewards(poolKey);
         (uint256 feeGrowthGlobalAfter0X128, uint256 feeGrowthGlobalAfter1X128,,,) =
             bondHookHub.getPoolInternalState(poolKey.toId());

@@ -34,7 +34,7 @@ import { StateLibrary as BondStateLibrary } from "./libraries/StateLibrary.sol";
 import { IMsgSender } from "./interfaces/IMsgSender.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
-/// @notice It acts as the place to provide liqudity to the pools and as the hook
+/// @notice It acts as the place to provide liquidity to the pools and as the hook
 /// @notice Once the issuance module launches the pool, the secondary market is open for trading
 contract BondHookHub is IUnlockCallback, IBondHookHub, Ownable, BaseHook {
     using BondHookLogic for BondHookState;

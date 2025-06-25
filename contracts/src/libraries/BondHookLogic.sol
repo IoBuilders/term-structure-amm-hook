@@ -83,7 +83,11 @@ library BondHookLogic {
                     _self.reservesData.vault1.deposit(deltaY.toUint256(), address(this));
                 }
             }
-
+            // Update liquidity after rebalance
+            _self.poolState.liquidity = (
+                _poolManager.balanceOf(address(this), _poolKey.currency0.toId())
+                    * _poolManager.balanceOf(address(this), _poolKey.currency1.toId())
+            ).sqrt().toUint128();
             _self.priceDynamicParams.lastBlockKick = block.number;
             // Keep track of the tx index to ensure fairness in the trades due to the intra-block ordering priveleges
             _self.blockTxIndex = 0;

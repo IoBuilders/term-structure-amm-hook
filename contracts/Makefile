@@ -44,7 +44,7 @@ launch-pool: ## launches pool for the deployed bond
 	forge script script/03_LaunchPool.s.sol --rpc-url ${LOCAL_RPC_URL} --broadcast --private-key ${PRIVATE_KEY_ADMIN}
 
 test-contracts: ## run contracts tests with coverage
-	forge coverage
+	forge coverage --no-match-coverage script
 
 ___DEMO___: ##
 start-operator: ## deploy hook and start operator in one terminal

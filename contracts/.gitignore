@@ -17,3 +17,6 @@ docs/
 # Foundry coverage
 lcov.info
 coverage-html/
+
+# Dependencies
+node_modules/

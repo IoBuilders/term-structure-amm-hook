@@ -1,7 +1,6 @@
 {
   "scripts": {
-    "lint": "solhint 'src/**/*.sol' 'script/**/*.sol'",
-    "lint:fix": "solhint 'src/**/*.sol' 'test/**/*.sol' 'script/**/*.sol' --fix"
+    "lint": "solhint 'src/**/*.sol' 'script/**/*.sol'"
   },
   "devDependencies": {
     "solhint": "^6.0.0"

@@ -36,16 +36,16 @@ contract BondHookIssuance is IBondHookIssuance, Ownable {
     mapping(bytes3 => address) public codeToCurrency;
     IBondHookHub bondHookHub;
 
-    constructor(IBondHookHub _bondHookHub) {
-        factory = new Factory();
-        bondHookHub = _bondHookHub;
-    }
-
     modifier onlyBondAdmin(address _bond) {
         if (!AccessControl(_bond).hasRole(_DEFAULT_ADMIN_ROLE, msg.sender)) {
             revert CallerIsNotBondAdmin();
         }
         _;
+    }
+
+    constructor(IBondHookHub _bondHookHub) {
+        factory = new Factory();
+        bondHookHub = _bondHookHub;
     }
 
     /// @inheritdoc IBondHookIssuance

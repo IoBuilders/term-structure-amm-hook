@@ -9,7 +9,7 @@ import { Pool } from "@uniswap/v4-core/src/libraries/Pool.sol";
 /// @notice Library used to read information about a pool
 library StateLibrary {
     function getBondHookConfigData(IBondHookHub.BondHookState storage _self)
-        external
+        internal
         view
         returns (IBondHookHub.PoolConfigData memory poolConfigData_)
     {
@@ -35,7 +35,7 @@ library StateLibrary {
     }
 
     function getReserveAmounts(IBondHookHub.BondHookState storage _self)
-        external
+        internal
         view
         returns (uint256 reserveAmount0_, uint256 reserveAmount1_)
     {
@@ -44,7 +44,7 @@ library StateLibrary {
     }
 
     function getPoolInternalState(Pool.State storage _selfState)
-        external
+        internal
         view
         returns (
             uint256 feeGrowthGlobal0X128_,

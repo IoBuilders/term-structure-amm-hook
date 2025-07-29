@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "ordering": "error",
+    "func-order": "error",
+    "max-line-length": ["error", 121],
+    "no-unused-vars": "error"
+  }
+}

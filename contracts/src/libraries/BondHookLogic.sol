@@ -42,7 +42,7 @@ library BondHookLogic {
         address _bond,
         IPoolManager _poolManager
     )
-        external
+        internal
         returns (BeforeSwapDelta, BalanceDelta)
     {
         if (_self.priceDynamicParams.lastBlockKick != block.number) {
@@ -123,7 +123,7 @@ library BondHookLogic {
         PoolKey memory _poolKey,
         BondHookLpToken _lpToken
     )
-        external
+        internal
     {
         uint256 remainingAmount0;
         uint256 remainingAmount1;
@@ -162,7 +162,7 @@ library BondHookLogic {
         address _sender,
         PoolKey memory _poolKey
     )
-        external
+        internal
         returns (uint256 liqudityDelta_)
     {
         IBondHookHub.ReservesData memory reservesData = _self.reservesData;
@@ -236,28 +236,6 @@ library BondHookLogic {
             _amounts.unspecifiedTokenAmount,
             _singleSided
         );
-    }
-
-    function _calculateLiquidityDelta(
-        IBondHookHub.BondHookState storage _self,
-        PoolAmounts memory _poolAmounts,
-        uint256 _amountToWithdraw,
-        uint256 _unspecifiedTokenAmount,
-        bool _singleSided
-    )
-        internal
-        view
-        returns (uint256)
-    {
-        uint256 liqudityDelta_ = (_poolAmounts.amount0 * _poolAmounts.amount1).sqrt() - _self.poolState.liquidity;
-        // If the LP is single sided we subtract the part we deposited from our reserves
-        if (_singleSided) {
-            uint256 pctFilledWithReserve =
-                _amountToWithdraw > 0 ? _amountToWithdraw.mulDiv(DECIMAL_PRECISION, _unspecifiedTokenAmount) : 0;
-            liqudityDelta_ = liqudityDelta_.mulDiv(DECIMAL_PRECISION - pctFilledWithReserve / 2, DECIMAL_PRECISION)
-                .mulDiv(_self.singleSidedIncentive, BPS); // Added premium for depositing idle funds
-        }
-        return liqudityDelta_;
     }
 
     //TODO: Add limit for the case when total assets is less than reserveAmount
@@ -343,5 +321,27 @@ library BondHookLogic {
         }
         _self.priceDynamicParams.openingPrice = openingPrice.toUint256();
         return openingPrice.toUint256().sqrt().mulDiv(FixedPoint96.Q96, DECIMAL_PRECISION.sqrt()).toUint160();
+    }
+
+    function _calculateLiquidityDelta(
+        IBondHookHub.BondHookState storage _self,
+        PoolAmounts memory _poolAmounts,
+        uint256 _amountToWithdraw,
+        uint256 _unspecifiedTokenAmount,
+        bool _singleSided
+    )
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 liqudityDelta_ = (_poolAmounts.amount0 * _poolAmounts.amount1).sqrt() - _self.poolState.liquidity;
+        // If the LP is single sided we subtract the part we deposited from our reserves
+        if (_singleSided) {
+            uint256 pctFilledWithReserve =
+                _amountToWithdraw > 0 ? _amountToWithdraw.mulDiv(DECIMAL_PRECISION, _unspecifiedTokenAmount) : 0;
+            liqudityDelta_ = liqudityDelta_.mulDiv(DECIMAL_PRECISION - pctFilledWithReserve / 2, DECIMAL_PRECISION)
+                .mulDiv(_self.singleSidedIncentive, BPS); // Added premium for depositing idle funds
+        }
+        return liqudityDelta_;
     }
 }

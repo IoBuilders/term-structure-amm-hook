@@ -115,7 +115,10 @@ interface IBondHookHub {
     error RouterNotAllowed();
 
     /// @notice Thrown when caller is not issuance module
-    error NotIssuance();
+    error CallerNotIssuance();
+
+    /// @notice Thrown when caller is not the router
+    error CallerNotRouter();
 
     /// @notice Sets the address of the issuance module
     /// @param _issuance Address of the module

@@ -13,19 +13,15 @@ import { PoolId } from "@uniswap/v4-core/src/types/PoolId.sol";
 import { console2 } from "forge-std/Test.sol";
 
 contract MockRouter is IMsgSender, IUnlockCallback {
-    event SwapExecuted(address indexed sender, PoolId indexed id);
-
     IPoolManager poolManager;
     PoolKey poolKey;
     address sender;
 
+    event SwapExecuted(address indexed sender, PoolId indexed id);
+
     constructor(IPoolManager _poolManager, PoolKey memory _poolKey) {
         poolManager = _poolManager;
         poolKey = _poolKey;
-    }
-
-    function msgSender() external view returns (address) {
-        return sender;
     }
 
     function executeSwap(SwapParams memory _params) external {
@@ -45,5 +41,9 @@ contract MockRouter is IMsgSender, IUnlockCallback {
         } else {
             poolManager.take(poolKey.currency0, sender, uint256(uint128(swapDelta.amount0())));
         }
+    }
+
+    function msgSender() external view returns (address) {
+        return sender;
     }
 }

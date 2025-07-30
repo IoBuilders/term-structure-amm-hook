@@ -42,7 +42,7 @@ library BondHookLogic {
         address _bond,
         IPoolManager _poolManager
     )
-        internal
+        external
         returns (BeforeSwapDelta, BalanceDelta)
     {
         if (_self.priceDynamicParams.lastBlockKick != block.number) {
@@ -123,7 +123,7 @@ library BondHookLogic {
         PoolKey memory _poolKey,
         BondHookLpToken _lpToken
     )
-        internal
+        external
     {
         uint256 remainingAmount0;
         uint256 remainingAmount1;
@@ -162,7 +162,7 @@ library BondHookLogic {
         address _sender,
         PoolKey memory _poolKey
     )
-        internal
+        external
         returns (uint256 liqudityDelta_)
     {
         IBondHookHub.ReservesData memory reservesData = _self.reservesData;

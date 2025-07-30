@@ -22,8 +22,7 @@ import type { AtsControlList } from "@blockchain/AtsControlList";
 const { abi: ABI } = ERC20Artifact;
 
 export default class ERC20 extends BaseContract<typeof ABI> implements IERC20 {
-  private _atsControlList: AtsControlList;
-  private _lastApprovalEventBlock: number = 0;
+  private _atsControlList?: AtsControlList;
 
   constructor({ address, account, atsControlList }: NewERC20Command) {
     super({
@@ -32,7 +31,9 @@ export default class ERC20 extends BaseContract<typeof ABI> implements IERC20 {
       account,
       eventList: ERC20.events,
     });
-    this._atsControlList = atsControlList;
+    if (atsControlList) {
+      this._atsControlList = atsControlList;
+    }
   }
 
   public async balanceOf({ account }: BalanceOfQuery): Promise<bigint> {
@@ -46,12 +47,12 @@ export default class ERC20 extends BaseContract<typeof ABI> implements IERC20 {
     amount,
     to,
   }: ApproveCommand): Promise<ApproveResponse | undefined> {
-    const isInControlList = await this._atsControlList.isInControlList({
+    const isInControlList = await this._atsControlList!.isInControlList({
       accountAddress: account,
     });
     if (isInControlList) {
       console.error(
-        `[⚙️ Admin Backend⚙️ ] 🔴 Account ${account} is in the ATS control list. Cannot perform this action.`,
+        `[⚙️ Admin Backend⚙️ ] 🔴 Account ${account} is in the ATS control list. Cannot perform this action.`
       );
       return undefined;
     }
@@ -62,7 +63,7 @@ export default class ERC20 extends BaseContract<typeof ABI> implements IERC20 {
 
     // Get the transaction receipt (including logs)
     const txReceipt = await this._validateRecentReceipt(
-      new ValidateRecentReceiptQuery({ txHash, log: true }),
+      new ValidateRecentReceiptQuery({ txHash, log: true })
     );
 
     // Fetch Swap events indexed by sender within that block
@@ -72,7 +73,7 @@ export default class ERC20 extends BaseContract<typeof ABI> implements IERC20 {
         fromBlock: txReceipt.blockNumber,
         toBlock: txReceipt.blockNumber,
         strict: true,
-      },
+      }
     );
 
     // Validate the approve event
@@ -94,12 +95,11 @@ export default class ERC20 extends BaseContract<typeof ABI> implements IERC20 {
         name: EVENTS.APPROVAL,
         func: (logs) => {
           logs.forEach((log) => {
-            // ! duplicate events
-            // console.log(new Separator().separator);
-            // console.log(
-            //     `🎯 Approval event detected - (⛓️  TxHash: ${log.transactionHash})`
-            // );
-            // console.log(new Separator().separator);
+            console.log(new Separator().separator);
+            console.log(
+              `🎯 Approval event detected - (⛓️  TxHash: ${log.transactionHash})`
+            );
+            console.log(new Separator().separator);
           });
         },
       }),

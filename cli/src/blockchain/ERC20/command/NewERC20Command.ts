@@ -6,15 +6,17 @@ const { abi: ABI } = ERC20Artifact;
 
 interface NewERC20CommandParams
   extends Omit<NewBaseContractCommand<typeof ABI>, "abi" | "eventList"> {
-  atsControlList: AtsControlList;
+  atsControlList?: AtsControlList;
 }
 
 export default class NewERC20Command extends NewBaseContractCommand<
   typeof ABI
 > {
-  public atsControlList: AtsControlList;
+  public atsControlList?: AtsControlList;
   constructor({ address, account, atsControlList }: NewERC20CommandParams) {
     super({ abi: ABI, address, account, eventList: [] });
-    this.atsControlList = atsControlList;
+    if (atsControlList) {
+      this.atsControlList = atsControlList;
+    }
   }
 }

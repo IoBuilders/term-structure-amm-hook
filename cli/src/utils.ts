@@ -26,24 +26,25 @@ export async function connectAccountToHookAndTokens({
     });
   }
 
-  const hookInquirer_ = await HookInquirer.create({
-    bondAddress: config.atsBondAddr,
-    eurAddress: config.eurAddr,
-    hookHubAddress: config.hookHubAddr,
-    routerAddress: config.routerAddr,
-    lpTokenAddress: config.lpTokenAddr,
-    account,
-  });
   const bond_ = new ERC20(
     new NewERC20Command({
       address: config.atsBondAddr,
       account,
       atsControlList,
-    }),
+    })
   );
   const eur_ = new ERC20(
-    new NewERC20Command({ address: config.eurAddr, account, atsControlList }),
+    new NewERC20Command({ address: config.eurAddr, account, atsControlList })
   );
+
+  const hookInquirer_ = await HookInquirer.create({
+    bond: bond_,
+    eur: eur_,
+    hookHubAddress: config.hookHubAddr,
+    routerAddress: config.routerAddr,
+    lpTokenAddress: config.lpTokenAddr,
+    account,
+  });
 
   if (accountType !== "invalid") {
     console.log("🔄 Approving tokens for hook hub...");
@@ -52,14 +53,14 @@ export async function connectAccountToHookAndTokens({
         account: account.address,
         amount: maxUint256,
         to: config.hookHubAddr,
-      }),
+      })
     );
     await eur_.approve(
       new ApproveCommand({
         account: account.address,
         amount: maxUint256,
         to: config.hookHubAddr,
-      }),
+      })
     );
     console.log("✅ Approvals complete");
   }

@@ -87,14 +87,67 @@ contract BondHookHub is IUnlockCallback, IBondHookHub, Ownable, BaseHook {
     /// @inheritdoc IUnlockCallback
     function unlockCallback(bytes calldata _data) external returns (bytes memory) {
         if (msg.sender != address(poolManager)) revert CallerNotRouter();
+
         ModifyLiqudityParams memory params = abi.decode(_data, (ModifyLiqudityParams));
 
+        PoolId poolId = params.poolKey.toId();
+
+        address bond = poolToBond[poolId];
+
+        _checkCompliance(bond, params.sender);
+
+        BondHookLpToken lpToken = BondHookLpToken(bondDetails[bond].lpToken);
+    
+        (uint256 feeGrowthInside0X128, uint256 feeGrowthInside1X128,,,) =
+            bondHookState[poolId].poolState.getPoolInternalState();
+
         if (!params.add) {
-            _removeLiqudiity(params);
+            bondHookState[poolId].removeLiqudity(
+                params.amount, poolManager, params.sender, params.poolKey, lpToken
+            );
+            (uint256 feesOwed0, uint256 feesOwed1) = lpToken.burn(
+                params.sender,
+                params.amount,
+                feeGrowthInside0X128,
+                feeGrowthInside1X128,
+                bondHookState[poolId].poolState.liquidity
+            );
+            if (feesOwed0 > 0) {
+                poolManager.burn(address(this), params.poolKey.currency0.toId(), feesOwed0);
+                poolManager.take(params.poolKey.currency0, params.sender, feesOwed0);
+            }
+            if (feesOwed1 > 0) {
+                poolManager.burn(address(this), params.poolKey.currency1.toId(), feesOwed1);
+                poolManager.take(params.poolKey.currency1, params.sender, feesOwed1);
+            }
+            emit ModifiedLiquidity(params.sender, params.amount);
         } else {
-            _addLiquidity(params);
+            // After expiration only liqudity removals are supported
+            _checkBondMaturityDate(poolToBond[poolId]);
+            // LP specifies an amount to provide in the desired token and we match it against the pair
+            uint256 unspecifiedTokenAmount = _getUnspecifiedAmount(params);
+
+            uint256 liqudityDelta = bondHookState[poolId].addLiquidity(
+                params.addParams.singleSided,
+                params.addParams.isToken0,
+                ModifyLiqudityAmounts({
+                    specifiedTokenAmount: params.amount,
+                    unspecifiedTokenAmount: unspecifiedTokenAmount
+                }),
+                poolManager,
+                params.sender,
+                params.poolKey
+            );
+            lpToken.mint(
+                params.sender,
+                liqudityDelta,
+                feeGrowthInside0X128,
+                feeGrowthInside1X128,
+                bondHookState[poolId].poolState.liquidity
+            );
+            emit ModifiedLiquidity(params.sender, liqudityDelta);
         }
-        bondHookState[params.poolKey.toId()].poolState.liquidity = (
+        bondHookState[poolId].poolState.liquidity = (
             (
                 poolManager.balanceOf(address(this), params.poolKey.currency0.toId())
                     * poolManager.balanceOf(address(this), params.poolKey.currency1.toId())
@@ -305,76 +358,6 @@ contract BondHookHub is IUnlockCallback, IBondHookHub, Ownable, BaseHook {
         }
 
         return (IHooks.beforeSwap.selector, beforeSwapDelta, uint24(0));
-    }
-
-    function _removeLiqudiity(ModifyLiqudityParams memory _params) internal {
-        address bond = poolToBond[_params.poolKey.toId()];
-        _checkCompliance(bond, _params.sender);
-
-        BondHookLpToken lpToken = BondHookLpToken(bondDetails[bond].lpToken);
-        (uint256 feeGrowthInside0X128, uint256 feeGrowthInside1X128,,,) =
-            bondHookState[_params.poolKey.toId()].poolState.getPoolInternalState();
-
-        bondHookState[_params.poolKey.toId()].removeLiqudity(
-            _params.amount, poolManager, _params.sender, _params.poolKey, lpToken
-        );
-
-        (uint256 feesOwed0, uint256 feesOwed1) = lpToken.burn(
-            _params.sender,
-            _params.amount,
-            feeGrowthInside0X128,
-            feeGrowthInside1X128,
-            bondHookState[_params.poolKey.toId()].poolState.liquidity
-        );
-        if (feesOwed0 > 0) {
-            poolManager.burn(address(this), _params.poolKey.currency0.toId(), feesOwed0);
-            poolManager.take(_params.poolKey.currency0, _params.sender, feesOwed0);
-        }
-        if (feesOwed1 > 0) {
-            poolManager.burn(address(this), _params.poolKey.currency1.toId(), feesOwed1);
-            poolManager.take(_params.poolKey.currency1, _params.sender, feesOwed1);
-        }
-
-        emit ModifiedLiquidity(_params.sender, _params.amount);
-    }
-
-    function _addLiquidity(ModifyLiqudityParams memory _params) internal {
-        PoolId poolId = _params.poolKey.toId();
-
-        address bond = poolToBond[poolId];
-        _checkCompliance(bond, _params.sender);
-
-        BondHookLpToken lpToken = BondHookLpToken(bondDetails[bond].lpToken);
-        (uint256 feeGrowthInside0X128, uint256 feeGrowthInside1X128,,,) =
-            bondHookState[poolId].poolState.getPoolInternalState();
-
-        // After expiration only liqudity removals are supported
-        _checkBondMaturityDate(poolToBond[poolId]);
-
-        // LP specifies an amount to provide in the desired token and we match it against the pair
-        uint256 unspecifiedTokenAmount = _getUnspecifiedAmount(_params);
-
-        uint256 liqudityDelta = bondHookState[poolId].addLiquidity(
-            _params.addParams.singleSided,
-            _params.addParams.isToken0,
-            ModifyLiqudityAmounts({
-                specifiedTokenAmount: _params.amount,
-                unspecifiedTokenAmount: unspecifiedTokenAmount
-            }),
-            poolManager,
-            _params.sender,
-            _params.poolKey
-        );
-
-        lpToken.mint(
-            _params.sender,
-            liqudityDelta,
-            feeGrowthInside0X128,
-            feeGrowthInside1X128,
-            bondHookState[poolId].poolState.liquidity
-        );
-
-        emit ModifiedLiquidity(_params.sender, liqudityDelta);
     }
 
     function _getUnspecifiedAmount(ModifyLiqudityParams memory _params)

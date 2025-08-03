@@ -43,22 +43,34 @@ make build-contracts
 Spin up Anvil with pre-deployed ATS infrastructure:
 
 ```sh
+# When using testnet, set up your own Pk and RPC url
 make build-anvil-state-with-deployed-contracts
 ```
 
-### Deploy Bond & Start Operator
+### Deploy Bond & Start Operator (Local)
 
 In one terminal:
 
 1. Copy environment variables:  
    ```sh
    cp .env.sample .env
+   # Set up your own Pk for testnet usage
+   # Set up your desired RPC url
    ```  
-2. Run the operator:  
+2. Run the operator (note that in testnet you will need to wait for the starting date of the bond to pass before launching the pool):  
    ```sh
+   # Set up your own Pk and RPC in the AVS
    make start-operator
    ```  
    This deploys the issuance module, hook, LP token, and EigenLayer contracts; configures the hook as the AVS oracle consumer; and launches the pool. The operator listens for tasks and responds with updated YTM.
+
+You can also skip the operator part and deploy a pool with a flat YTM by running:
+
+```sh
+make deploy-bond
+# Wait unti starting date is passed  
+make launch-pool
+```
 
 ### Start Traffic
 
@@ -79,6 +91,7 @@ In another terminal, switch to the CLI folder and configure your Circle API key:
 cd cli
 cp .env.sample .env
 # Edit .env to add your Circle API key
+# When using testnet, edit .env to add your Pk and RPC
 bun start
 ```
 

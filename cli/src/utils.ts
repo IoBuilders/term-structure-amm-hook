@@ -31,10 +31,10 @@ export async function connectAccountToHookAndTokens({
       address: config.atsBondAddr,
       account,
       atsControlList,
-    })
+    }),
   );
   const eur_ = new ERC20(
-    new NewERC20Command({ address: config.eurAddr, account, atsControlList })
+    new NewERC20Command({ address: config.eurAddr, account, atsControlList }),
   );
 
   const hookInquirer_ = await HookInquirer.create({
@@ -53,14 +53,14 @@ export async function connectAccountToHookAndTokens({
         account: account.address,
         amount: maxUint256,
         to: config.hookHubAddr,
-      })
+      }),
     );
     await eur_.approve(
       new ApproveCommand({
         account: account.address,
         amount: maxUint256,
         to: config.hookHubAddr,
-      })
+      }),
     );
     console.log("✅ Approvals complete");
   }

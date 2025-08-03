@@ -11,7 +11,7 @@ Term Structure AMM brings yield curves on-chain by using a combination of fair v
 1. [Installation](#installation)  
 2. [Build](#build)  
 3. [Test](#test)  
-4. [Local Contracts Deployment](#local-contracts-deployment)  
+4. [Contracts Deployment](#contracts-deployment)  
    1. [Deploy ATS Infrastructure](#deploy-ats-infrastructure)  
    2. [Deploy Hub & Bond](#deploy-hub--bond)  
    3. [Launch Pool](#launch-pool)  
@@ -33,7 +33,7 @@ Compile the smart contracts:
 make build-contracts
 ```
 
-## Local Contracts Deployment
+## Contracts Deployment
 
 First, configure, the .env files, then:
 
@@ -68,3 +68,5 @@ Run tests with coverage reporting:
 ```sh
 make test-contracts
 ```
+
+## Deployments

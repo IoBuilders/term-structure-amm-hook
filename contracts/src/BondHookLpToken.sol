@@ -47,8 +47,8 @@ contract BondHookLpToken is Ownable, ERC20 {
             }
         }
 
-        feeData.feeGrowthInside0LastX128  = _feeGrowthInside0X128;
-        feeData.feeGrowthInside1LastX128  = _feeGrowthInside1X128;
+        feeData.feeGrowthInside0LastX128 = _feeGrowthInside0X128;
+        feeData.feeGrowthInside1LastX128 = _feeGrowthInside1X128;
 
         _mint(_to, _amount);
     }

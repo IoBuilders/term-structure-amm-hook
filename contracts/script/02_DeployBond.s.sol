@@ -29,7 +29,7 @@ import { stdJson } from "forge-std/StdJson.sol";
 
 contract BondDeployer is Script {
     bytes32 constant BOND_CONFIG_ID = 0x0000000000000000000000000000000000000000000000000000000000000002;
-    uint256 constant STARTING_DATE_OFFSET = 1 days;
+    uint256 constant STARTING_DATE_OFFSET = 30 seconds;
     uint256 constant EXPIRATION_DATE_OFFSET = 2 days;
     string constant ISIN = "US0378331005";
     uint8 constant DECIMALS = 18;

@@ -34,7 +34,7 @@ export default class HookInquirer {
     bond: ERC20,
     eur: ERC20,
     lpToken: ERC20,
-    hookHub: HookHub
+    hookHub: HookHub,
   ) {
     this._router = router;
     this._poolKey = router.poolKey;
@@ -82,17 +82,17 @@ export default class HookInquirer {
           address: routerAddress,
           account,
         },
-        poolKey
-      )
+        poolKey,
+      ),
     );
     const lpToken = new ERC20(
       new NewERC20Command({
         address: lpTokenAddress,
         account,
-      })
+      }),
     );
     const hookHub = new HookHub(
-      new NewHookHubCommand({ address: hookHubAddress, account }, poolKey)
+      new NewHookHubCommand({ address: hookHubAddress, account }, poolKey),
     );
 
     return new HookInquirer(router, bond, eur, lpToken, hookHub);
@@ -134,14 +134,14 @@ export default class HookInquirer {
         new SwapCommand({
           account: address,
           swapParams,
-        })
+        }),
       );
 
       const balanceBonds = await this._bond.balanceOf(
-        new BalanceOfQuery({ account: address })
+        new BalanceOfQuery({ account: address }),
       );
       const balanceEurs = await this._eur.balanceOf(
-        new BalanceOfQuery({ account: address })
+        new BalanceOfQuery({ account: address }),
       );
 
       return {
@@ -200,17 +200,17 @@ export default class HookInquirer {
           new ModifyLiquidiyCommand({
             account: address,
             modifyLiquidityParams: removeLiqudityParams,
-          })
+          }),
         );
 
         const balanceLpTokens = await this._lpToken.balanceOf(
-          new BalanceOfQuery({ account: address })
+          new BalanceOfQuery({ account: address }),
         );
         const balanceBonds = await this._bond.balanceOf(
-          new BalanceOfQuery({ account: address })
+          new BalanceOfQuery({ account: address }),
         );
         const balanceEurs = await this._eur.balanceOf(
-          new BalanceOfQuery({ account: address })
+          new BalanceOfQuery({ account: address }),
         );
 
         return {
@@ -266,17 +266,17 @@ export default class HookInquirer {
           new ModifyLiquidiyCommand({
             account: address,
             modifyLiquidityParams: addLiquidtyParams,
-          })
+          }),
         );
 
         const balanceLpTokens = await this._lpToken.balanceOf(
-          new BalanceOfQuery({ account: address })
+          new BalanceOfQuery({ account: address }),
         );
         const balanceBonds = await this._bond.balanceOf(
-          new BalanceOfQuery({ account: address })
+          new BalanceOfQuery({ account: address }),
         );
         const balanceEurs = await this._eur.balanceOf(
-          new BalanceOfQuery({ account: address })
+          new BalanceOfQuery({ account: address }),
         );
 
         return {

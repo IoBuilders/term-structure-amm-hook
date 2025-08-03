@@ -10,8 +10,6 @@ import { BalanceDelta } from "@uniswap/v4-core/src/types/BalanceDelta.sol";
 import { PoolKey } from "@uniswap/v4-core/src/types/PoolKey.sol";
 import { PoolId } from "@uniswap/v4-core/src/types/PoolId.sol";
 
-import { console2 } from "forge-std/Test.sol";
-
 contract MockRouter is IMsgSender, IUnlockCallback {
     IPoolManager poolManager;
     PoolKey poolKey;
@@ -34,7 +32,6 @@ contract MockRouter is IMsgSender, IUnlockCallback {
     function unlockCallback(bytes calldata _data) external returns (bytes memory) {
         if (msg.sender != address(poolManager)) revert("CallerIsNotPoolManager");
         SwapParams memory swapParams = abi.decode(_data, (SwapParams));
-        console2.log("SWAP");
         BalanceDelta swapDelta = poolManager.swap(poolKey, swapParams, "");
         if (swapParams.zeroForOne) {
             poolManager.take(poolKey.currency1, sender, uint256(uint128(swapDelta.amount1())));

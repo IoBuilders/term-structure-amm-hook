@@ -69,11 +69,16 @@ contract BondHookHub is IUnlockCallback, IBondHookHub, Ownable, BaseHook {
         external
     {
         if (msg.sender != issuance) revert CallerNotIssuance();
+
         bondHookState[_poolKey.toId()].poolState.slot0 =
             bondHookState[_poolKey.toId()].poolState.slot0.setSqrtPriceX96(_sqrtPriceX96);
+
         _configureLaunchedPool(bondHookState[_poolKey.toId()], _poolConfigData);
+
         bondDetails[_bond].lpToken = _lpToken;
+
         poolToBond[_poolKey.toId()] = _bond;
+
         bondHookState[_poolKey.toId()].priceDynamicParams.openingPrice =
             _sqrtPriceX96.mulDiv(_sqrtPriceX96, FixedPoint96.Q96).mulDiv(DECIMAL_PRECISION, FixedPoint96.Q96);
     }
@@ -106,10 +111,13 @@ contract BondHookHub is IUnlockCallback, IBondHookHub, Ownable, BaseHook {
     // TODO: Consider JIT LPs frontrunning
     function distributeYieldFarmingRewards(PoolKey calldata _poolKey) external {
         BondHookState storage state = bondHookState[_poolKey.toId()];
+
         ERC4626 vault0 = state.reservesData.vault0;
         ERC4626 vault1 = state.reservesData.vault1;
+
         uint256 income0 = vault0.convertToAssets(vault0.balanceOf(address(this))) - state.reservesData.reserveAmount0;
         uint256 income1 = vault1.convertToAssets(vault1.balanceOf(address(this))) - state.reservesData.reserveAmount1;
+
         uint256 liquidity = state.poolState.liquidity;
 
         if (income0 > 0) {
@@ -119,6 +127,7 @@ contract BondHookHub is IUnlockCallback, IBondHookHub, Ownable, BaseHook {
         if (income1 > 0) {
             vault1.withdraw(income1, address(this), address(this));
         }
+
         state.poolState.feeGrowthGlobal0X128 += income0.mulDiv(FixedPoint128.Q128, liquidity);
         state.poolState.feeGrowthGlobal1X128 += income1.mulDiv(FixedPoint128.Q128, liquidity);
     }
@@ -126,6 +135,7 @@ contract BondHookHub is IUnlockCallback, IBondHookHub, Ownable, BaseHook {
     /// @inheritdoc IBondHookHub
     function emptyVaults(PoolKey calldata _poolKey) external {
         BondHookState storage state = bondHookState[_poolKey.toId()];
+
         ERC4626 vault0 = state.reservesData.vault0;
         ERC4626 vault1 = state.reservesData.vault1;
 
@@ -154,6 +164,7 @@ contract BondHookHub is IUnlockCallback, IBondHookHub, Ownable, BaseHook {
         }
 
         uint256 liquidity = bondHookState[_poolKey.toId()].poolState.liquidity;
+
         state.poolState.feeGrowthGlobal0X128 += totalAssets0.mulDiv(FixedPoint128.Q128, liquidity);
         state.poolState.feeGrowthGlobal1X128 += totalAssets1.mulDiv(FixedPoint128.Q128, liquidity);
     }
@@ -309,9 +320,11 @@ contract BondHookHub is IUnlockCallback, IBondHookHub, Ownable, BaseHook {
 
     function _removeLiqudiity(ModifyLiqudityParams memory _params) internal {
         address bond = poolToBond[_params.poolKey.toId()];
+
         _checkCompliance(bond, _params.sender);
 
         BondHookLpToken lpToken = BondHookLpToken(bondDetails[bond].lpToken);
+
         (uint256 feeGrowthInside0X128, uint256 feeGrowthInside1X128,,,) =
             bondHookState[_params.poolKey.toId()].poolState.getPoolInternalState();
 
@@ -326,6 +339,7 @@ contract BondHookHub is IUnlockCallback, IBondHookHub, Ownable, BaseHook {
             feeGrowthInside1X128,
             bondHookState[_params.poolKey.toId()].poolState.liquidity
         );
+
         if (feesOwed0 > 0) {
             poolManager.burn(address(this), _params.poolKey.currency0.toId(), feesOwed0);
             poolManager.take(_params.poolKey.currency0, _params.sender, feesOwed0);
@@ -342,9 +356,11 @@ contract BondHookHub is IUnlockCallback, IBondHookHub, Ownable, BaseHook {
         PoolId poolId = _params.poolKey.toId();
 
         address bond = poolToBond[poolId];
+
         _checkCompliance(bond, _params.sender);
 
         BondHookLpToken lpToken = BondHookLpToken(bondDetails[bond].lpToken);
+
         (uint256 feeGrowthInside0X128, uint256 feeGrowthInside1X128,,,) =
             bondHookState[poolId].poolState.getPoolInternalState();
 

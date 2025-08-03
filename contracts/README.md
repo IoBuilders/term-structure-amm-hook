@@ -33,15 +33,9 @@ Compile the smart contracts:
 make build-contracts
 ```
 
-## Test
-
-Run tests with coverage reporting:
-
-```sh
-make test-contracts
-```
-
 ## Local Contracts Deployment
+
+First, configure, the .env files, then:
 
 ### Deploy ATS Infrastructure
 
@@ -65,4 +59,12 @@ Finally, initialize and seed the liquidity pool:
 
 ```sh
 make launch-pool
+```
+
+## Test
+
+Run tests with coverage reporting:
+
+```sh
+make test-contracts
 ```

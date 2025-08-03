@@ -1,64 +1,80 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
+
+# ——— Configurable via .env.ats ———
+# .env.ats should contain at least:
+#   NETWORK=local
+# or
+#   NETWORK=testnet
+#
+# (you can add more vars here later if you like)
 
 # Paths
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ATS_CONFIG_DIR="$BASE_DIR/config/ats"
 ATS_CONTRACTS_DIR="$BASE_DIR/lib/asset-tokenization-studio/contracts"
-ENV_FILE="$BASE_DIR/config/ats/.env.ats"
+ENV_FILE="$ATS_CONFIG_DIR/.env.ats"
 ENV_TARGET="$ATS_CONTRACTS_DIR/.env"
 DEPLOYMENTS_NAME="deployments"
 ATS_DEPLOYMENTS_JSON="$ATS_CONTRACTS_DIR/$DEPLOYMENTS_NAME.json"
-DEPLOYMENTS_JSON_TARGET="$BASE_DIR/config/ats/$DEPLOYMENTS_NAME.json"
+DEPLOYMENTS_JSON_TARGET="$ATS_CONFIG_DIR/$DEPLOYMENTS_NAME.json"
 
-echo "Starting Anvil chain..."
-anvil -q &
-ANVIL_PID=$!
+# Load network (and any future vars) from .env.ats
+if [[ ! -f "$ENV_FILE" ]]; then
+  echo "❌  Missing $ENV_FILE; please create it with at least NETWORK=local or testnet"
+  exit 1
+fi
+set -a
+. "$ENV_FILE"
+set +a
 
-sleep 3
+echo "✔️  Using network: $NETWORK"
 
-# Copy .env
-echo "Copying '.env.ats' to '.env'..."
+# Spin up Anvil only when running locally
+if [[ "$NETWORK" == "local" ]]; then
+  echo "🚀  Starting Anvil chain..."
+  anvil -q &
+  ANVIL_PID=$!
+  # give it a moment to be ready
+  sleep 3
+else
+  echo "🔗  SKIPPING local Anvil (testnet)"
+fi
+
+# Push the same .env.ats into the contracts folder as `.env`
+echo "📋  Copying $ENV_FILE → $ENV_TARGET"
 cp "$ENV_FILE" "$ENV_TARGET"
 
-echo "Deploying infrastructure..."
-
+echo "📦  Deploying contracts via Hardhat…"
 cd "$ATS_CONTRACTS_DIR"
 
 if [[ ! -d "typechain-types" ]]; then
-  echo "'typechain-types' directory not found. Running 'npm run compile:force'..."
+  echo "🛠  typechain-types not found, compiling…"
   npm run compile:force
 else
-  echo "'typechain-types' directory already exists. Skipping compile."
+  echo "✅  typechain-types present, skipping compile"
 fi
 
-npx hardhat deployAll --network local --file-name "$DEPLOYMENTS_NAME"
+npx hardhat deployAll --network "$NETWORK" --file-name "$DEPLOYMENTS_NAME"
 
-# Ensure the destination directory exists
+# ensure target dir exists
 mkdir -p "$(dirname "$DEPLOYMENTS_JSON_TARGET")"
 
-echo "Creating compact deployments.json..."
-
+echo "🔍  Generating compact $DEPLOYMENTS_NAME.json…"
 node <<EOF
 const fs = require('fs');
 const path = require('path');
 
-const inputPath = path.resolve("${ATS_DEPLOYMENTS_JSON}");
-const outputPath = path.resolve("${DEPLOYMENTS_JSON_TARGET}");
-
-const nameToKey = (name) =>
-  name
-    .replace(/\s+/g, '')
-    .replace(/^[A-Z]/, (c) => c.toLowerCase());
-
-const raw = fs.readFileSync(inputPath, 'utf-8');
+const raw = fs.readFileSync(path.resolve("${ATS_DEPLOYMENTS_JSON}"), 'utf-8');
 const parsed = JSON.parse(raw);
 
-const result = {};
-parsed.forEach(({ name, address }) => {
-  const key = nameToKey(name);
-  result[key] = { address };
-});
+const compact = parsed.reduce((acc, { name, address }) => {
+  const key = name.replace(/\s+/g, '').replace(/^[A-Z]/, c => c.toLowerCase());
+  acc[key] = { address };
+  return acc;
+}, {});
 
-fs.writeFileSync(outputPath, JSON.stringify(result, null, 2));
-console.log("Compact deployments written to", outputPath);
+fs.writeFileSync(path.resolve("${DEPLOYMENTS_JSON_TARGET}"),
+                 JSON.stringify(compact, null, 2));
+console.log("👉  Compact deployments written to", "${DEPLOYMENTS_JSON_TARGET}");
 EOF

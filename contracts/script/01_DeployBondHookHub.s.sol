@@ -8,22 +8,20 @@ import { IPoolManager, PoolManager } from "@uniswap/v4-core/src/PoolManager.sol"
 import { HookMiner } from "@uniswap/v4-periphery/src/utils/HookMiner.sol";
 import { BondHookHub } from "../src/BondHookHub.sol";
 import { stdJson } from "forge-std/StdJson.sol";
+import { Create2Factory } from "./utils/Create2Factory.sol";
 
 contract BondHookHubDeployer is Script {
-    address constant CREATE2_DEPLOYER = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
-
     function run() public {
         uint160 flags = uint160(Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG);
 
         vm.startBroadcast();
         PoolManager poolManager = new PoolManager(msg.sender);
         bytes memory constructorArgs = abi.encode(poolManager, vm.addr(vm.envUint("PRIVATE_KEY_ADMIN")));
+        Create2Factory factory = new Create2Factory();
         (address hookAddress, bytes32 salt) =
-            HookMiner.find(CREATE2_DEPLOYER, flags, type(BondHookHub).creationCode, constructorArgs);
-        BondHookHub bondHookHub = new BondHookHub{ salt: salt }(
-            IPoolManager(address(poolManager)), vm.addr(vm.envUint("PRIVATE_KEY_ADMIN"))
-        );
-        require(address(bondHookHub) == hookAddress, "BondHookHubDeployer: hook address mismatch");
+            HookMiner.find(address(factory), flags, type(BondHookHub).creationCode, constructorArgs);
+        address bondHookHub = factory.deploy(salt, abi.encodePacked(type(BondHookHub).creationCode, constructorArgs));
+        require(bondHookHub == hookAddress, "BondHookHubDeployer: hook address mismatch");
         vm.stopBroadcast();
 
         string memory deploymentJson = string.concat(

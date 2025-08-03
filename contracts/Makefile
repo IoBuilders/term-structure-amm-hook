@@ -37,8 +37,8 @@ deploy-bond: ## deploys pool manager, bond hook and bond
 	fi
 	forge script script/01_DeployBondHookHub.s.sol --rpc-url ${LOCAL_RPC_URL} --broadcast --private-key ${PRIVATE_KEY_ADMIN}
 	forge script script/02_DeployBond.s.sol --rpc-url ${LOCAL_RPC_URL} --broadcast --private-key ${PRIVATE_KEY_ADMIN}
-# 	@cast rpc evm_increaseTime 86400 --rpc-url ${LOCAL_RPC_URL}
-# 	@cast rpc evm_mine --rpc-url ${LOCAL_RPC_URL}
+	@cast rpc evm_increaseTime 86400 --rpc-url ${LOCAL_RPC_URL}
+	@cast rpc evm_mine --rpc-url ${LOCAL_RPC_URL}
 
 launch-pool: ## launches pool for the deployed bond
 	forge script script/03_LaunchPool.s.sol --rpc-url ${LOCAL_RPC_URL} --broadcast --private-key ${PRIVATE_KEY_ADMIN}

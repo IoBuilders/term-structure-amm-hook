@@ -44,6 +44,14 @@ export default class HookInquirer {
     this._hookHub = hookHub;
   }
 
+  set account(account: Account) {
+    this._router.account = account;
+    this._bond.account = account;
+    this._eur.account = account;
+    this._lpToken.account = account;
+    this._hookHub.account = account;
+  }
+
   public static async create({
     bond,
     routerAddress,
@@ -295,5 +303,13 @@ export default class HookInquirer {
         }
       }
     }
+  }
+
+  public get bond(): ERC20 {
+    return this._bond;
+  }
+
+  public get eur(): ERC20 {
+    return this._eur;
   }
 }

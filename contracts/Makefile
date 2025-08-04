@@ -48,6 +48,8 @@ test-contracts: ## run contracts tests with coverage
 
 ___DEMO___: ##
 start-operator: ## deploy hook and start operator in one terminal
+	@cast send --value 100ether --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
+		0x56D04e9A9858405E4711CE7527b7a0A651Ea9999
 	make deploy-bond
 	cd ../avs && cp .env.example .env && cp contracts/.env.example contracts/.env \
 	&& npm run build:forge && npm run deploy:core && npm run deploy:bond-yield

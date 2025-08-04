@@ -14,7 +14,7 @@ import {
 import { type Address } from "viem";
 import { ERC20 } from "@blockchain/ERC20";
 import Time from "@time";
-import { connectAccountToHookAndTokens } from "@utils";
+import { changeConnectedAccount, connectAccountToHookAndTokens } from "@utils";
 
 let atsControlList: AtsControlList;
 let bond: ERC20;
@@ -383,18 +383,13 @@ do {
           askForIdempotencyKey: false,
         });
       }
-      ({
-        hookInquirer_: hookInquirer,
-        bond_: bond,
-        eur_: eur,
-      } = await connectAccountToHookAndTokens({
-        account,
-        config,
-        circleInquirer,
+      await changeConnectedAccount({
+        hookInquirer: hookInquirer,
         accountType,
-        atsControlList,
-      }));
-
+        account,
+        hookHubAddress: config.hookHubAddr,
+        circleInquirer,
+      });
       timeToSleepAfterAction = 2; // seconds
       break;
 

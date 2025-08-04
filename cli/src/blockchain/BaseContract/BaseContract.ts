@@ -50,6 +50,10 @@ export default abstract class BaseContract<AbiType extends Abi> {
     }
   }
 
+  set account(account: Account) {
+    this._account = account;
+  }
+
   get abi(): AbiType {
     return this._abi;
   }

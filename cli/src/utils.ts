@@ -3,7 +3,7 @@ import type Configuration from "@configuration";
 import { HookInquirer, type CircleInquirer } from "@inquirer";
 import { Account } from "@blockchain";
 import type { AtsControlList } from "@blockchain/AtsControlList";
-import { maxUint256 } from "viem";
+import { maxUint256, type Address } from "viem";
 
 // * Utility function to connect the account to the tokens and the hook
 export async function connectAccountToHookAndTokens({
@@ -66,4 +66,45 @@ export async function connectAccountToHookAndTokens({
   }
 
   return { hookInquirer_, bond_, eur_ };
+}
+
+export async function changeConnectedAccount({
+  hookInquirer,
+  accountType,
+  account,
+  hookHubAddress,
+  circleInquirer,
+}: {
+  hookInquirer: HookInquirer;
+  accountType: "valid" | "invalid" | "admin";
+  account: Account;
+  hookHubAddress: Address;
+  circleInquirer?: CircleInquirer;
+}) {
+  if (circleInquirer && circleInquirer.isApiComplianceEnabled()) {
+    await circleInquirer.inquireComplianceCheck({
+      accountAddress: account.address,
+      askForIdempotencyKey: false,
+    });
+  }
+
+  hookInquirer.account = account;
+  if (accountType !== "invalid") {
+    console.log("🔄 Approving tokens for hook hub...");
+    await hookInquirer.bond.approve(
+      new ApproveCommand({
+        account: account.address,
+        amount: maxUint256,
+        to: hookHubAddress,
+      }),
+    );
+    await hookInquirer.eur.approve(
+      new ApproveCommand({
+        account: account.address,
+        amount: maxUint256,
+        to: hookHubAddress,
+      }),
+    );
+    console.log("✅ Approvals complete");
+  }
 }

@@ -14,7 +14,7 @@ The project is structured in three folders:
 2. [Quick Start](#quick-start)  
    1. [Build Contracts](#build-contracts)  
    2. [Start Anvil Chain](#start-anvil-chain)  
-   3. [Deploy Bond & Start Operator](#deploy-bond--start-operator)  
+   3. [Deploy Bond & Start Operator](#deploy-bond--start-operator-local)  
    4. [Start Traffic](#start-traffic)  
    5. [Start the CLI](#start-the-cli)  
 ---
@@ -44,6 +44,7 @@ Spin up Anvil with pre-deployed ATS infrastructure:
 
 ```sh
 # When using testnet, set up your own Pk and RPC url
+# Set NETWORK in config/ats/.env.ats
 make build-anvil-state-with-deployed-contracts
 ```
 
@@ -62,7 +63,7 @@ In one terminal:
    # Set up your own Pk and RPC in the AVS
    make start-operator
    ```  
-   This deploys the issuance module, hook, LP token, and EigenLayer contracts; configures the hook as the AVS oracle consumer; and launches the pool. The operator listens for tasks and responds with updated YTM.
+   This deploys the issuance module, hook, LP token, and EigenLayer contracts; configures the hook as the AVS oracle consumer; and launches the pool. The operator listens for tasks and responds with updated YTM. The valid address you set in the .env will be funded with 100 of each of the pools tokens.
 
 You can also skip the operator part and deploy a pool with a flat YTM by running:
 
@@ -91,7 +92,7 @@ In another terminal, switch to the CLI folder and configure your Circle API key:
 cd cli
 cp .env.sample .env
 # Edit .env to add your Circle API key
-# When using testnet, edit .env to add your Pk and RPC
+# When using testnet, edit .env to add your Pk and RPC url
 bun start
 ```
 

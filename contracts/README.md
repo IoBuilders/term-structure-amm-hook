@@ -10,11 +10,11 @@ Term Structure AMM brings yield curves on-chain by using a combination of fair v
 
 1. [Installation](#installation)  
 2. [Build](#build)  
-3. [Test](#test)  
-4. [Contracts Deployment](#contracts-deployment)  
+3. [Contracts Deployment](#contracts-deployment)  
    1. [Deploy ATS Infrastructure](#deploy-ats-infrastructure)  
    2. [Deploy Hub & Bond](#deploy-hub--bond)  
    3. [Launch Pool](#launch-pool)  
+4. [Test](#test)  
 ---
 
 ## Installation
@@ -68,5 +68,3 @@ Run tests with coverage reporting:
 ```sh
 make test-contracts
 ```
-
-## Deployments
